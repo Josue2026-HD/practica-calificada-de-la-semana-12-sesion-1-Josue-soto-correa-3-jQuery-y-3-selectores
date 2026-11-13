@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro Académico</title>
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { background: #eef2f7; font-family: Arial, sans-serif; }
+        .contenedor { max-width: 900px; margin: 40px auto; }
+        .titulo {
+            background: #0d6efd; color: white;
+            padding: 20px; border-radius: 12px 12px 0 0;
+            text-align: center;
+        }
+        .resultado { display: none; margin-top: 25px; }
+        .card { border-radius: 12px; }
+        .excelente  { color: #0a7d2c; font-weight: bold; }
+        .bueno      { color: #0d6efd; font-weight: bold; }
+        .regular    { color: #b8860b; font-weight: bold; }
+        .malo       { color: #e8590c; font-weight: bold; }
+        .deficiente { color: #dc3545; font-weight: bold; }
+    </style>
+</head>
+<body>
+<div class="container contenedor">
+    <div class="card shadow">
+        <div class="titulo">
+            <h2>REGISTRO ACADÉMICO</h2>
+            <p class="mb-0">Aplicación utilizando Selectores con jQuery</p>
+        </div>
+        <div class="card-body">
+
+            <!-- DATOS DEL ESTUDIANTE -->
+            <h4 class="mb-3">Datos del estudiante</h4>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Código:</label>
+                    <input type="text" id="codigo" class="form-control" placeholder="Ejemplo: EST001">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Nombre:</label>
+                    <input type="text" id="nombre" class="form-control" placeholder="Ingrese nombres completos">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Carrera:</label>
+                    <select id="carrera" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Administración de Empresas</option>
+                        <option>Arquitectura de Plataformas y Servicios de Tecnologías de Información</option>
+                        <option>Contabilidad</option>
+                        <option>Electricidad Industrial</option>
+                        <option>Electrónica Industrial</option>
+                        <option>Enfermería Técnica</option>
+                        <option>Mecánica de Producción Industrial</option>
+                        <option>Mecatrónica Automotriz</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Semestre:</label>
+                    <input type="text" id="semestre" class="form-control" placeholder="Ejemplo: 2026-II">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label>Ciclo:</label>
+                    <select id="ciclo" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>I</option><option>II</option><option>III</option>
+                        <option>IV</option><option>V</option><option>VI</option>
+                        <option>VII</option><option>VIII</option><option>IX</option>
+                        <option>X</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Turno:</label>
+                    <div class="pt-1">
+                        <input type="radio" name="turno" value="Mañana" checked> Mañana
+                        <input type="radio" name="turno" value="Tarde" class="ms-3"> Tarde
+                        <input type="radio" name="turno" value="Noche" class="ms-3"> Noche
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Modalidad:</label>
+                    <select id="modalidad" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Presencial</option>
+                        <option>SemiPresencial</option>
+                        <option>Virtual</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Curso:</label>
+                    <select id="curso" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Programación Web</option>
+                        <option>Base de Datos</option>
+                        <option>Algoritmos</option>
+                        <option>sistema operativos</option>
+                        <option>FUNDAMENTOS DE DESARROLLO WEB</option>
+                        <option>ADMINISTRACIÓN DE BASE DE DATOS</option>
+                        <option>DESARROLLO DE APLICACIONES</option>
+                        <option>TENDENCIAS Y TECNOLOGÍAS EMERGENTES EN DESARROLLO DE SOFTWARE</option>
+                        <option>COMPRENSIÓN Y REDACCIÓN DE TEXTOS EN INGLÉS</option>
+                        <option>ÉTICA Y DEONTOLOGÍA</option>
+                        <option>ADMINISTRACIÓN DE SERVIDORES DE RED</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>Docente:</label>
+                    <input type="text" id="docente" class="form-control" placeholder="Nombre del docente">
+                </div>
+            </div>
+            <hr>
+
+            <!-- NOTAS -->
+            <h4 class="mb-1">Calificaciones</h4>
+            <p class="text-muted small">
+                Pesos: Prácticas = <b>1</b>, Examen parcial = <b>2</b>, Examen final = <b>3</b>
+            </p>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Práctica 1:</label>
+                    <input type="number" id="practica1" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Práctica 2:</label>
+                    <input type="number" id="practica2" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Examen parcial:</label>
+                    <input type="number" id="parcial" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Práctica 3:</label>
+                    <input type="number" id="practica3" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Práctica 4:</label>
+                    <input type="number" id="practica4" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Examen final:</label>
+                    <input type="number" id="final" class="form-control" min="0" max="20" placeholder="0 - 20">
+                </div>
+            </div>
+
+            <div class="text-center mt-3">
+                <button id="btnRegistrar" class="btn btn-primary">Registrar estudiante</button>
+                <button id="btnLimpiar" class="btn btn-secondary">Limpiar</button>
+            </div>
+
+            <!-- RESULTADO -->
+            <div id="resultado" class="resultado">
+                <div class="alert alert-info">
+                    <h4>Resultado académico</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Código:</strong> <span id="rCodigo"></span></p>
+                            <p><strong>Nombre:</strong> <span id="rNombre"></span></p>
+                            <p><strong>Carrera:</strong> <span id="rCarrera"></span></p>
+                            <p><strong>Semestre:</strong> <span id="rSemestre"></span></p>
+                            <p><strong>Ciclo:</strong> <span id="rCiclo"></span></p>
+                            <p><strong>Turno:</strong> <span id="rTurno"></span></p>
+                            <p><strong>Modalidad:</strong> <span id="rModalidad"></span></p>
+                            <p><strong>Curso:</strong> <span id="rCurso"></span></p>
+                            <p><strong>Docente:</strong> <span id="rDocente"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Práctica 1:</strong> <span id="rP1"></span></p>
+                            <p><strong>Práctica 2:</strong> <span id="rP2"></span></p>
+                            <p><strong>Examen parcial:</strong> <span id="rParcial"></span></p>
+                            <p><strong>Práctica 3:</strong> <span id="rP3"></span></p>
+                            <p><strong>Práctica 4:</strong> <span id="rP4"></span></p>
+                            <p><strong>Examen final:</strong> <span id="rFinal"></span></p>
+                        </div>
+                    </div>
+                    <hr>
+                    <p><strong>Promedio de prácticas:</strong> <span id="rPromPracticas"></span></p>
+                    <p><strong>Promedio final:</strong> <span id="rPromedio"></span></p>
+                    <p><strong>Condición:</strong> <span id="rEstado"></span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+
+    // Pesos
+    const PESO1 = 1; // Prácticas
+    const PESO2 = 2; // Examen parcial
+    const PESO3 = 3; // Examen final
+
+    function leerNota(selector) {
+        return parseFloat($(selector).val());
+    }
+
+    function clasificar(prom) {
+        if (prom >= 18) return { texto: "Excelente",  clase: "excelente" };
+        if (prom >= 16) return { texto: "Bueno",      clase: "bueno" };
+        if (prom >= 14) return { texto: "Regular",    clase: "regular" };
+        if (prom >= 10) return { texto: "Malo",       clase: "malo" };
+        return              { texto: "Deficiente",  clase: "deficiente" };
+    }
+
+    $("#btnRegistrar").click(function () {
+
+        // Selectores por ID
+        let codigo    = $("#codigo").val().trim();
+        let nombre    = $("#nombre").val().trim();
+        let carrera   = $("#carrera").val();
+        let semestre  = $("#semestre").val().trim();
+        let ciclo     = $("#ciclo").val();
+        let turno     = $("input[name='turno']:checked").val();
+        let curso     = $("#curso").val();
+        let docente   = $("#docente").val().trim();
+        let modalidad = $("#modalidad").val();
+
+        if (!codigo || !nombre || !carrera || !semestre || !ciclo ||
+            !curso || !docente || !modalidad) {
+            alert("Complete todos los datos.");
+            return;
+        }
+
+        let p1 = leerNota("#practica1");
+        let p2 = leerNota("#practica2");
+        let parcial = leerNota("#parcial");
+        let p3 = leerNota("#practica3");
+        let p4 = leerNota("#practica4");
+        let examFinal = leerNota("#final");
+
+        let notas = [p1, p2, parcial, p3, p4, examFinal];
+        for (let n of notas) {
+            if (isNaN(n) || n < 0 || n > 20) {
+                alert("Ingrese todas las notas (entre 0 y 20).");
+                return;
+            }
+        }
+
+        // Promedio ponderado
+        let promPracticas = (p1 + p2 + p3 + p4) / 4;
+        let promedio = (promPracticas * PESO1 + parcial * PESO2 + examFinal * PESO3)
+                       / (PESO1 + PESO2 + PESO3);
+
+        let cond = clasificar(promedio);
+
+        // Mostrar resultados
+        $("#rCodigo").text(codigo);
+        $("#rNombre").text(nombre);
+        $("#rCarrera").text(carrera);
+        $("#rSemestre").text(semestre);
+        $("#rCiclo").text(ciclo);
+        $("#rTurno").text(turno);
+        $("#rModalidad").text(modalidad);
+        $("#rCurso").text(curso);
+        $("#rDocente").text(docente);
+        $("#rP1").text(p1);
+        $("#rP2").text(p2);
+        $("#rParcial").text(parcial);
+        $("#rP3").text(p3);
+        $("#rP4").text(p4);
+        $("#rFinal").text(examFinal);
+        $("#rPromPracticas").text(promPracticas.toFixed(2));
+        $("#rPromedio").text(promedio.toFixed(2));
+
+        $("#rEstado")
+            .removeClass("excelente bueno regular malo deficiente")
+            .addClass(cond.clase)
+            .text(cond.texto);
+
+        $("#resultado").slideDown();
+    });
+
+    $("#btnLimpiar").click(function () {
+        $("input[type='text'], input[type='number']").val("");
+        $("select").val("");
+        $("input[name='turno'][value='Mañana']").prop("checked", true);
+        $("#resultado").slideUp();
+    });
+});
+</script>
+</body>
+</html>

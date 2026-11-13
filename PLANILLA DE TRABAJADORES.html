@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planilla de Trabajadores</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { background: #eef2f7; font-family: Arial, sans-serif; }
+        .contenedor { max-width: 1000px; margin: 40px auto; }
+        .titulo { background: #6f42c1; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+        .card { border-radius: 12px; }
+        tr.mayor { background: #fff3cd !important; font-weight: bold; }
+        tr.menor { background: #f8d7da !important; }
+    </style>
+</head>
+<body>
+<div class="container contenedor">
+    <div class="card shadow">
+        <div class="titulo">
+            <h2>PLANILLA DE TRABAJADORES</h2>
+        </div>
+        <div class="card-body">
+
+            <h4 class="mb-3">Registrar trabajador</h4>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label>Nombre:</label>
+                    <input type="text" id="nombre" class="form-control">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Cargo:</label>
+                    <select id="cargo" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Analista</option>
+                        <option>Programador</option>
+                        <option>Soporte</option>
+                        <option>Jefe de área</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Sueldo base (S/):</label>
+                    <input type="number" id="sueldo" class="form-control" min="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Horas extras:</label>
+                    <input type="number" id="horas" class="form-control" min="0" value="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Hijos (bonificación S/ 50 c/u):</label>
+                    <input type="number" id="hijos" class="form-control" min="0" value="0">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="d-block">Sistema de pensión:</label>
+                    <input type="radio" name="pension" value="13" checked> ONP (13%)
+                    <input type="radio" name="pension" value="12" class="ms-3"> AFP (12%)
+                </div>
+            </div>
+
+            <div class="text-center mb-4">
+                <button id="btnAgregar" class="btn btn-primary">Agregar a planilla</button>
+                <button id="btnMayor" class="btn btn-warning">Resaltar mayor / menor neto</button>
+                <button id="btnBuscar" class="btn btn-info">Filtrar por cargo</button>
+                <button id="btnQuitarUltimo" class="btn btn-danger">Eliminar último</button>
+            </div>
+
+            <table class="table table-bordered table-striped text-center" id="tabla">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th><th>Nombre</th><th>Cargo</th><th>Sueldo base</th>
+                        <th>Horas extras</th><th>Bonif. hijos</th><th>Descuento pensión</th><th>Neto a pagar</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr class="table-secondary">
+                        <td colspan="7" class="text-end"><strong>Total planilla:</strong></td>
+                        <td><strong>S/ <span id="totalPlanilla">0.00</span></strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <p class="text-muted small mb-0">
+                Trabajadores registrados: <span id="contador">0</span> |
+                Primero: <span id="primero">-</span> |
+                Último: <span id="ultimo">-</span>
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+
+    // Valor de la hora extra = sueldo / 240 * 1.25
+    function actualizarResumen() {
+        // Selector hijo directo: tbody > tr
+        let filas = $("#tabla tbody > tr");
+        let total = 0;
+
+        // Selector nth-child: columna 8 = neto
+        $("#tabla tbody tr td:nth-child(8)").each(function () {
+            total += parseFloat($(this).text());
+        });
+
+        // Renumerar filas con eq() e index
+        filas.each(function (i) {
+            $(this).find("td:first-child").text(i + 1);
+        });
+
+        $("#totalPlanilla").text(total.toFixed(2));
+        $("#contador").text(filas.length);
+        // Selectores :first y :last
+        $("#primero").text($("#tabla tbody tr:first td:nth-child(2)").text() || "-");
+        $("#ultimo").text($("#tabla tbody tr:last td:nth-child(2)").text() || "-");
+
+        // Zebra personalizado con :even / :odd
+        $("#tabla tbody tr:even").css("background-color", "#f3ecfb");
+        $("#tabla tbody tr:odd").css("background-color", "#ffffff");
+    }
+
+    $("#btnAgregar").click(function () {
+        let nombre = $("#nombre").val().trim();
+        let cargo  = $("#cargo").val();
+        let sueldo = parseFloat($("#sueldo").val());
+        let horas  = parseFloat($("#horas").val()) || 0;
+        let hijos  = parseInt($("#hijos").val()) || 0;
+        let pens   = parseFloat($("input[name='pension']:checked").val());
+
+        if (!nombre || !cargo || isNaN(sueldo) || sueldo <= 0) {
+            alert("Complete nombre, cargo y sueldo base.");
+            return;
+        }
+
+        let pagoExtras = (sueldo / 240) * 1.25 * horas;
+        let bonif      = hijos * 50;
+        let bruto      = sueldo + pagoExtras + bonif;
+        let descuento  = bruto * pens / 100;
+        let neto       = bruto - descuento;
+
+        let fila = "<tr>" +
+            "<td></td>" +
+            "<td>" + nombre + "</td>" +
+            "<td>" + cargo + "</td>" +
+            "<td>" + sueldo.toFixed(2) + "</td>" +
+            "<td>" + pagoExtras.toFixed(2) + "</td>" +
+            "<td>" + bonif.toFixed(2) + "</td>" +
+            "<td>" + descuento.toFixed(2) + " (" + pens + "%)</td>" +
+            "<td>" + neto.toFixed(2) + "</td>" +
+            "</tr>";
+
+        $("#tabla tbody").append(fila);
+        $("input[type='text'], input[type='number']").not("#horas, #hijos").val("");
+        $("#cargo").val("");
+        actualizarResumen();
+    });
+
+    $("#btnMayor").click(function () {
+        let filas = $("#tabla tbody tr");
+        if (filas.length === 0) return;
+
+        filas.removeClass("mayor menor");
+        let max = -Infinity, min = Infinity, filaMax, filaMin;
+
+        filas.each(function () {
+            let neto = parseFloat($(this).children("td:last-child").text());
+            if (neto > max) { max = neto; filaMax = this; }
+            if (neto < min) { min = neto; filaMin = this; }
+        });
+
+        $(filaMax).addClass("mayor");
+        $(filaMin).addClass("menor");
+    });
+
+    // Selector :contains
+    $("#btnBuscar").click(function () {
+        let cargo = $("#cargo").val();
+        let filas = $("#tabla tbody tr");
+        if (!cargo) { filas.show(); return; }
+        filas.hide();
+        filas.filter(":contains('" + cargo + "')").show();
+    });
+
+    $("#btnQuitarUltimo").click(function () {
+        $("#tabla tbody tr:last").remove();
+        actualizarResumen();
+    });
+});
+</script>
+</body>
+</html>

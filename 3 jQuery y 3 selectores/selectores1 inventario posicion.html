@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selectores 1 - Inventario</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { background: #eef2f7; font-family: Arial, sans-serif; }
+        .contenedor { max-width: 900px; margin: 40px auto; }
+        .titulo { background: #6610f2; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+        .card { border-radius: 12px; }
+        tr.marcada td { background: #ffe69c !important; }
+    </style>
+</head>
+<body>
+<div class="container contenedor">
+    <div class="card shadow">
+        <div class="titulo">
+            <h2>INVENTARIO: SELECTORES DE POSICIÓN Y FILTRO</h2>
+        </div>
+        <div class="card-body">
+
+            <table class="table table-bordered text-center" id="tabla">
+                <thead class="table-dark">
+                    <tr><th>#</th><th>Producto</th><th>Categoría</th><th>Stock</th><th>Precio (S/)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Laptop</td><td>Cómputo</td><td>5</td><td>2500</td></tr>
+                    <tr><td>2</td><td>Mouse</td><td>Accesorios</td><td>40</td><td>45</td></tr>
+                    <tr><td>3</td><td>Teclado</td><td>Accesorios</td><td>25</td><td>80</td></tr>
+                    <tr><td>4</td><td>Monitor</td><td>Cómputo</td><td>8</td><td>350</td></tr>
+                    <tr><td>5</td><td>Impresora</td><td>Oficina</td><td>12</td><td>600</td></tr>
+                    <tr><td>6</td><td>Router</td><td>Redes</td><td>18</td><td>150</td></tr>
+                    <tr><td>7</td><td>Switch</td><td>Redes</td><td>6</td><td>420</td></tr>
+                    <tr><td>8</td><td>Webcam</td><td>Accesorios</td><td>30</td><td>110</td></tr>
+                </tbody>
+            </table>
+
+            <h5>Elija un selector para aplicarlo a las filas</h5>
+            <div class="d-flex flex-wrap gap-2 mb-3" id="botones">
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:even">tr:even</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:odd">tr:odd</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:first">tr:first</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:last">tr:last</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:eq(3)">tr:eq(3)</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:gt(4)">tr:gt(4)</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:lt(2)">tr:lt(2)</button>
+                <button class="btn btn-outline-primary btn-sm" data-sel="tr:contains('Accesorios')">tr:contains('Accesorios')</button>
+                <button class="btn btn-outline-danger btn-sm" id="btnLimpiar">Quitar marcas</button>
+            </div>
+
+            <div class="alert alert-secondary">
+                <p><strong>Selector aplicado:</strong> <code id="rSelector">-</code></p>
+                <p><strong>Filas seleccionadas:</strong> <span id="rCantidad">0</span></p>
+                <p><strong>Unidades en stock (suma):</strong> <span id="rStock">0</span></p>
+                <p class="mb-0"><strong>Valor del inventario seleccionado:</strong> S/ <span id="rValor">0.00</span></p>
+            </div>
+
+            <div class="alert alert-warning">
+                <strong>Reposición:</strong> productos con stock menor a
+                <input type="number" id="minimo" value="10" class="form-control d-inline-block" style="width:80px">
+                <button id="btnStockBajo" class="btn btn-warning btn-sm">Marcar</button>
+                <span id="rBajo" class="ms-2"></span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+
+    function marcar(selector) {
+        $("#tabla tbody tr").removeClass("marcada");
+        let filas = $("#tabla tbody " + selector).addClass("marcada");
+
+        let stock = 0, valor = 0;
+        filas.each(function () {
+            let s = parseFloat($(this).find("td:eq(3)").text());
+            let p = parseFloat($(this).find("td:eq(4)").text());
+            stock += s;
+            valor += s * p;
+        });
+
+        $("#rSelector").text(selector);
+        $("#rCantidad").text(filas.length);
+        $("#rStock").text(stock);
+        $("#rValor").text(valor.toFixed(2));
+    }
+
+    $("#botones button[data-sel]").click(function () {
+        marcar($(this).attr("data-sel"));
+    });
+
+    $("#btnStockBajo").click(function () {
+        let minimo = parseFloat($("#minimo").val()) || 0;
+        $("#tabla tbody tr").removeClass("marcada");
+        // filter() con función: combina un selector con una condición propia
+        let bajos = $("#tabla tbody tr").filter(function () {
+            return parseFloat($(this).children("td:nth-child(4)").text()) < minimo;
+        }).addClass("marcada");
+
+        let nombres = bajos.map(function () {
+            return $(this).children("td:eq(1)").text();
+        }).get();
+        $("#rBajo").text(nombres.length ? nombres.join(", ") : "Ninguno");
+    });
+
+    $("#btnLimpiar").click(function () {
+        $("#tabla tbody tr").removeClass("marcada");
+        $("#rSelector").text("-");
+        $("#rCantidad, #rStock").text(0);
+        $("#rValor").text("0.00");
+        $("#rBajo").text("");
+    });
+});
+</script>
+</body>
+</html>

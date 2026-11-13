@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reserva de Pasajes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body { background: #eef2f7; font-family: Arial, sans-serif; }
+        .contenedor { max-width: 900px; margin: 40px auto; }
+        .titulo { background: #fd7e14; color: white; padding: 20px; border-radius: 12px 12px 0 0; text-align: center; }
+        .card { border-radius: 12px; }
+        .resultado { display: none; margin-top: 25px; }
+        .asientos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-width: 320px; margin: auto; }
+        .asiento { padding: 10px 0; border: 2px solid #198754; background: white; border-radius: 8px; font-weight: bold; }
+        .asiento[data-tipo='VIP'] { border-color: #6f42c1; }
+        .asiento:disabled { background: #adb5bd; border-color: #6c757d; color: #fff; cursor: not-allowed; }
+        .asiento.seleccionado { background: #fd7e14; border-color: #fd7e14; color: white; }
+    </style>
+</head>
+<body>
+<div class="container contenedor">
+    <div class="card shadow">
+        <div class="titulo">
+            <h2>RESERVA DE PASAJES DE BUS</h2>
+        </div>
+        <div class="card-body">
+
+            <h4 class="mb-3">Datos del viaje</h4>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label>Pasajero:</label>
+                    <input type="text" id="pasajero" class="form-control">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label>DNI:</label>
+                    <input type="text" id="dni" class="form-control" maxlength="8">
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Origen:</label>
+                    <select id="origen" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Lima</option><option>Arequipa</option>
+                        <option>Cusco</option><option>Trujillo</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Destino:</label>
+                    <select id="destino" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option>Lima</option><option>Arequipa</option>
+                        <option>Cusco</option><option>Trujillo</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label>Fecha de viaje:</label>
+                    <input type="date" id="fecha" class="form-control">
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="d-block">Tipo de pasajero:</label>
+                    <input type="radio" name="tipoPasajero" value="0" data-nombre="Adulto" checked> Adulto
+                    <input type="radio" name="tipoPasajero" value="20" data-nombre="Estudiante" class="ms-3"> Estudiante (-20%)
+                    <input type="radio" name="tipoPasajero" value="30" data-nombre="Adulto mayor" class="ms-3"> Adulto mayor (-30%)
+                </div>
+            </div>
+            <hr>
+
+            <h4 class="mb-1">Elija sus asientos</h4>
+            <p class="text-muted small">
+                <span style="color:#6f42c1">■</span> VIP (S/ 60) &nbsp;
+                <span style="color:#198754">■</span> Normal (S/ 40) &nbsp;
+                <span style="color:#6c757d">■</span> Ocupado
+            </p>
+            <div id="mapaAsientos" class="asientos mb-3"></div>
+            <p class="text-center">Asientos elegidos: <b id="listaAsientos">ninguno</b></p>
+
+            <div class="text-center mt-3">
+                <button id="btnReservar" class="btn btn-warning text-white">Reservar</button>
+                <button id="btnVIP" class="btn btn-outline-primary">Marcar solo VIP libres</button>
+                <button id="btnLimpiar" class="btn btn-secondary">Limpiar</button>
+            </div>
+
+            <div id="resultado" class="resultado">
+                <div class="alert alert-warning">
+                    <h4>Boleta de reserva</h4>
+                    <p><strong>Pasajero:</strong> <span id="rPasajero"></span> (DNI <span id="rDni"></span>)</p>
+                    <p><strong>Ruta:</strong> <span id="rRuta"></span></p>
+                    <p><strong>Fecha:</strong> <span id="rFecha"></span></p>
+                    <p><strong>Tipo de pasajero:</strong> <span id="rTipo"></span></p>
+                    <p><strong>Asientos:</strong> <span id="rAsientos"></span></p>
+                    <hr>
+                    <p><strong>Subtotal:</strong> S/ <span id="rSubtotal"></span></p>
+                    <p><strong>Descuento:</strong> - S/ <span id="rDescuento"></span></p>
+                    <h4>Total: S/ <span id="rTotal"></span></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function () {
+
+    const PRECIO_VIP = 60;
+    const PRECIO_NORMAL = 40;
+    const ocupados = [3, 7, 12, 15, 18];
+
+    // Generar el mapa de 20 asientos (1-8 VIP, 9-20 Normal)
+    for (let i = 1; i <= 20; i++) {
+        let tipo = i <= 8 ? "VIP" : "Normal";
+        let btn = $("<button type='button' class='asiento'></button>")
+            .text(i)
+            .attr("data-tipo", tipo)
+            .attr("data-precio", tipo === "VIP" ? PRECIO_VIP : PRECIO_NORMAL);
+        if (ocupados.includes(i)) btn.prop("disabled", true);
+        $("#mapaAsientos").append(btn);
+    }
+
+    function actualizarLista() {
+        // Selector de clase combinada + :not
+        let sel = $(".asiento.seleccionado");
+        let nums = sel.map(function () { return $(this).text(); }).get();
+        $("#listaAsientos").text(nums.length ? nums.join(", ") : "ninguno");
+    }
+
+    // Solo asientos habilitados: :not(:disabled)
+    $(".asiento:not(:disabled)").click(function () {
+        $(this).toggleClass("seleccionado");
+        actualizarLista();
+    });
+
+    // Selector por atributo: solo VIP libres
+    $("#btnVIP").click(function () {
+        $(".asiento").removeClass("seleccionado");
+        $(".asiento[data-tipo='VIP']:not(:disabled)").addClass("seleccionado");
+        actualizarLista();
+    });
+
+    $("#btnReservar").click(function () {
+        let pasajero = $("#pasajero").val().trim();
+        let dni      = $("#dni").val().trim();
+        let origen   = $("#origen option:selected").val();
+        let destino  = $("#destino option:selected").val();
+        let fecha    = $("#fecha").val();
+        let tipoRad  = $("input[name='tipoPasajero']:checked");
+        let descPorc = parseFloat(tipoRad.val());
+        let tipoTxt  = tipoRad.attr("data-nombre");
+        let elegidos = $(".asiento.seleccionado");
+
+        if (!pasajero || !/^\d{8}$/.test(dni) || !origen || !destino || !fecha) {
+            alert("Complete todos los datos (DNI de 8 dígitos).");
+            return;
+        }
+        if (origen === destino) {
+            alert("El origen y el destino no pueden ser iguales.");
+            return;
+        }
+        if (elegidos.length === 0) {
+            alert("Seleccione al menos un asiento.");
+            return;
+        }
+
+        let subtotal = 0, numeros = [];
+        elegidos.each(function () {
+            subtotal += parseFloat($(this).attr("data-precio"));
+            numeros.push($(this).text() + " (" + $(this).attr("data-tipo") + ")");
+        });
+
+        // El descuento solo aplica al primer asiento (el del propio pasajero)
+        let precioPrimero = parseFloat(elegidos.eq(0).attr("data-precio"));
+        let descuento = precioPrimero * descPorc / 100;
+        let total = subtotal - descuento;
+
+        $("#rPasajero").text(pasajero);
+        $("#rDni").text(dni);
+        $("#rRuta").text(origen + " → " + destino);
+        $("#rFecha").text(fecha);
+        $("#rTipo").text(tipoTxt);
+        $("#rAsientos").text(numeros.join(", "));
+        $("#rSubtotal").text(subtotal.toFixed(2));
+        $("#rDescuento").text(descuento.toFixed(2));
+        $("#rTotal").text(total.toFixed(2));
+
+        $("#resultado").slideDown();
+    });
+
+    $("#btnLimpiar").click(function () {
+        $("input[type='text'], input[type='date']").val("");
+        $("select").val("");
+        $("input[name='tipoPasajero'][value='0']").prop("checked", true);
+        $(".asiento").removeClass("seleccionado");
+        actualizarLista();
+        $("#resultado").slideUp();
+    });
+});
+</script>
+</body>
+</html>
